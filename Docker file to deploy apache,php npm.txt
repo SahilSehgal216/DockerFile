@@ -1,0 +1,34 @@
+FROM centos:latest
+MAINTAINER Sahil Sehgal <premsehgal216@gmail.com>
+
+RUN yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+RUN yum install -y http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+RUN yum-config-manager --enable remi-php70
+RUN yum install -y yum-utils
+RUN yum update -y && yum upgrade -y
+RUN yum install -y httpd curl php70w php-composer* php-ldap* mod_php*
+RUN yum clean all
+
+
+ENV APACHE_RUN_USER root
+ENV APACHE_RUN_GROUP root
+ENV APACHE_LOG_DIR /var/log/apache2
+ENV APACHE_LOCK_DIR /var/lock/apache2
+ENV APACHE_PID_FILE /var/run/apache2.pid
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+EXPOSE 8080
+
+
+ADD httpd.conf /etc/httpd/conf/.
+
+RUN cp public/.htaccess .
+RUN chmod +x .htaccess
+RUN cp server.php index.php
+RUN composer install && php artisan key:generate && php artisan passport:key && composer dump
+RUN chmod -R 775 storage/ export/ public/
+RUN chown -R apache:apache *
+RUN /usr/sbin/httpd -D BACKGROUND
+
+CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
+CMD ["/usr/bin/redis-server", "/etc/redis.conf"]
