@@ -1,0 +1,7 @@
+docker build -t  image_name (to create image)
+docker run -d -p 8090:8080 image_name (to run image on specific port)
+docker run -m 512M -d -p 172.16.7.26:8080:8080 -p 6379:6379 image_name( to define multiple ports and specifying Ram)
+docker exec -it container_id /bin/bash(to get in bash of running container)
+docker ps (to know running containers)
+docker rmi -f container_id (to delete container that you want to remove)
+docker stop container_id (to stop a running container)
